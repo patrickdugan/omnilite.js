@@ -2,30 +2,38 @@ const { CSHA256 } = require('sha2');
 
 function isBigEndian() {
     const bint = { i: 0x01020304 };
-    return bint.c[0] === 1;
+    const byteArray = new Uint8Array(new Uint32Array([bint.i]).buffer);
+    return byteArray[0] === 1;
 }
 
 function swapByteOrder16(us) {
-    if (isBigEndian()) return;
-    us = ((us >> 8) & 0x00ff) | ((us << 8) & 0xff00);
+    if (isBigEndian()) return us;
+    return ((us >> 8) & 0x00ff) | ((us << 8) & 0xff00);
 }
 
 function swapByteOrder32(ui) {
-    if (isBigEndian()) return;
-    ui = ((ui >> 24) & 0x000000ff) | ((ui << 8) & 0x00ff0000) | ((ui >> 8) & 0x0000ff00) | ((ui << 24) & 0xff000000);
+    if (isBigEndian()) return ui;
+    return (
+        ((ui >> 24) & 0x000000ff) |
+        ((ui << 8) & 0x00ff0000) |
+        ((ui >> 8) & 0x0000ff00) |
+        ((ui << 24) & 0xff000000)
+    );
 }
-
 function swapByteOrder64(ull) {
     if (isBigEndian()) return;
-    ull =
-        ((ull >> 56) & 0x00000000000000ff) |
-        ((ull << 40) & 0x00ff000000000000) |
-        ((ull << 24) & 0x0000ff0000000000) |
-        ((ull << 8) & 0x000000ff00000000) |
-        ((ull >> 8) & 0x00000000ff000000) |
-        ((ull >> 24) & 0x0000000000ff0000) |
-        ((ull >> 40) & 0x000000000000ff00) |
-        ((ull << 56) & 0xff00000000000000);
+    ull = (
+        ((ull >> BigInt(56)) & BigInt(0x00000000000000ff)) |
+        ((ull << BigInt(40)) & BigInt(0x00ff000000000000)) |
+        ((ull << BigInt(24)) & BigInt(0x0000ff0000000000)) |
+        ((ull << BigInt(8)) & BigInt(0x000000ff00000000)) |
+        ((ull >> BigInt(8)) & BigInt(0x00000000ff000000)) |
+        ((ull >> BigInt(24)) & BigInt(0x0000000000ff0000)) |
+        ((ull >> BigInt(40)) & BigInt(0x000000000000ff00)) |
+        ((ull << BigInt(56)) & BigInt(0xff00000000000000))
+    );
+
+    // Note: The result `ull` will be a BigInt type.
 }
 
 function hashToAddress(version, hash) {
